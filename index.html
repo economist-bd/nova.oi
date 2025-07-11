@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Nova - AI Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Nova is an AI chatbot. যেখানে শব্দ এবং ছবি শিল্প তৈরি করে।" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: #f6f6f9;
+      color: #333;
+    }
+    .container {
+      max-width: 460px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      padding: 28px 18px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+      color: #4787ed;
+    }
+    .chatbox {
+      height: 350px;
+      overflow-y: auto;
+      border: 1px solid #eaeaea;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      padding: 10px;
+      background: #fafbff;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: #e7f0fd;
+      align-self: flex-start;
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+    .message.user {
+      background: #d1ffd6;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 9px 18px;
+      background: #4787ed;
+      color: white;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    button:hover {
+      background: #2364b3;
+    }
+    @media (max-width: 540px) {
+      .container {
+        margin: 10px;
+        padding: 14px 6px;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      .chatbox {
+        height: 260px;
+        font-size: 0.98rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Nova - AI Chatbot</h1>
+    <div class="chatbox" id="chatbox">
+      <div class="message">👋 স্বাগত! কিছু জিজ্ঞাসা করুন।</div>
+    </div>
+    <form id="chatForm" class="chat-input-row" autocomplete="off">
+      <input type="text" id="chatInput" placeholder="আপনার বার্তা টাইপ করুন…" required>
+      <button type="submit">পাঠান</button>
+    </form>
+  </div>
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+
+    function appendMessage(msg, sender = 'bot') {
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      div.textContent = msg;
+      chatbox.appendChild(div);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const userMessage = chatInput.value.trim();
+      if (userMessage === '') return;
+
+      appendMessage(userMessage, 'user');
+      chatInput.value = '';
+
+      try {
+        const response = await fetch('http://localhost:3000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: userMessage }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+
+        const data = await response.json();
+        const botMessage = data.response;
+        appendMessage(botMessage, 'bot');
+
+      } catch (error) {
+        console.error('Error:', error);
+        appendMessage('Sorry, something went wrong. Please try again.', 'bot');
+      }
+    });
+  </script>
+</body>
+</html>
