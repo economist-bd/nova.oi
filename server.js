@@ -45,3 +45,20 @@ app.post('/chat', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
+
+app.post('/chat', async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+    if (!userMessage) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+    const prompt = `You are Nova, a helpful AI assistant. You are speaking with a user from Bangladesh. Please respond in a friendly and helpful manner, primarily in Bengali. User's message: "${userMessage}"`;
+    const result = await model.generateContent(prompt);
+    const aiResponse = await result.response.text();
+    res.json({ response: aiResponse });
+  } catch (error) {
+    console.error('Error processing chat:', error);
+    // Return error details for debugging (remove in production)
+    res.status(500).json({ error: 'Failed to get response from AI', details: error.message });
+  }
+});
